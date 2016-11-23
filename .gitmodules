@@ -1,3 +1,3 @@
 [submodule "dev"]
 	path = dev
-	url = /mapr/mapr-dev/home/philip/repo/google/tensorflow.git
+    url = https://github.com/tensorflow/tensorflow.git
