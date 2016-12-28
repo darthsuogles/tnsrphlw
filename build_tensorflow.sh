@@ -19,9 +19,10 @@ fi
 pip3 install -U six numpy wheel
 (cd dev; echo "Update google/tensorflow repo"
 
- git checkout master
- git submodule update --init --recursive
- git pull
+ git remote add forigink https://github.com/tensorflow/tensorflow.git || echo "already there"
+ git fetch --all
+ git checkout forigink/master
+ git submodule update --init --recursive 
  alias python="$(which python3)"
 
  export PYTHON_BIN_PATH="$(which python3)"
