@@ -1,11 +1,18 @@
 #!/bin/bash
 
-ver=${1:-dev}
+__py_ver=${1:-3}
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 NUKE_EXISTING=yes
 
 set -ex
+
+# Python settings
+export PY_VER=${__py_ver}
+export PYTHON_PKG_PREFIX="$(python${PY_VER}-config --prefix)"
+export PYTHON_BIN_PATH="$(which python${PY_VER})"
+export PYTHON="$(which python${PY_VER})"
+export PIP="$(which pip${PY_VER})"
 
 if [ "darwin" == "${OS}" ]; then
     brew install bazel swig
@@ -16,35 +23,33 @@ else
                            uniq)
 fi
 
-pip3 install -U six numpy wheel
+"${PIP}" install -U six numpy wheel
 (cd dev; echo "Update google/tensorflow repo"
 
  git remote add forigink https://github.com/tensorflow/tensorflow.git || echo "already there"
  git fetch --all
  git checkout forigink/master
  git submodule update --init --recursive 
- alias python="$(which python3)"
 
- export PYTHON_BIN_PATH="$(which python3)"
  export USE_DEFAULT_PYTHON_LIB_PATH=1
  export TF_NEED_GCP=0
  export TF_NEED_HDFS=0
  export TF_NEED_CUDA=0
  export TF_NEED_OPENCL=0
  ./configure <<EOF
-$(find "$(python3-config --prefix)" -type d -name 'site-packages' | head -n1)
+$(find "${PYTHON_PKG_PREFIX}" -type d -name 'site-packages' | head -n1)
 EOF
 
  # Installing as a python package
  [ "yes" == "${NUKE_EXISTING}" ] && bazel clean --expunge
- bazel build -c opt //tensorflow/tools/pip_package:build_pip_package
+ bazel build -c opt --copt=-march=native //tensorflow/tools/pip_package:build_pip_package
  ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
- find /tmp/tensorflow_pkg -name 'tensorflow-*.whl' -exec pip3 install {} \;
+ find /tmp/tensorflow_pkg -name 'tensorflow-*.whl' -exec "${PIP}" install {} \;
 
  # Building locally for development
  rm -fr _python_build && mkdir _python_build
  cd _python_build
  ln -s ../bazel-bin/tensorflow/tools/pip_package/build_pip_package.runfiles/* .
  ln -s ../tensorflow/tools/pip_package/* .
- python3 setup.py develop
+ "${PYTHON}" setup.py develop
 )
