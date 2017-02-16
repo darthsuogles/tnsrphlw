@@ -18,6 +18,11 @@ if [ "darwin" == "${OS}" ]; then
     brew install bazel swig
 else
     module load linuxbrew bazel python
+    # if [[ "2" == "${PY_VER}" ]]; then
+    #     module load python
+    # else
+    #     module unload python
+    # fi    
     export JAVA_HOME=$(java -showversion -verbose 2>&1 | \
                            perl -ne 'print "$1\n" if /((\/.+)+)\/jre\/lib\/.+\.jar/' | \
                            uniq)
@@ -36,20 +41,29 @@ fi
  export TF_NEED_HDFS=0
  export TF_NEED_CUDA=0
  export TF_NEED_OPENCL=0
- ./configure <<EOF
-$(find "${PYTHON_PKG_PREFIX}" -type d -name 'site-packages' | head -n1)
-EOF
+ export TF_NEED_JEMALLOC=1
+ export TF_ENABLE_XLA=0
+ export PYTHON_BIN_PATH="$(which python3)"
+ export CC_OPT_FLAGS="-march=native"
+ ./configure
+#  ./configure <<EOF
+# $(find "${PYTHON_PKG_PREFIX}" -type d -name 'site-packages' | head -n1)
+# EOF
 
  # Installing as a python package
  [ "yes" == "${NUKE_EXISTING}" ] && bazel clean --expunge
  bazel build -c opt --copt=-march=native //tensorflow/tools/pip_package:build_pip_package
- ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
- find /tmp/tensorflow_pkg -name 'tensorflow-*.whl' -exec "${PIP}" install {} \;
+ 
+ tf_pkg_dir="/tmp/tensorflow_pkg"
+ rm -fr "${tf_pkg_dir}" && mkdir -p "${tf_pkg_dir}"
+ ./bazel-bin/tensorflow/tools/pip_package/build_pip_package "${tf_pkg_dir}"
+ "${PIP}" uninstall -y tensorflow
+ find "${tf_pkg_dir}/" -name 'tensorflow-*.whl' -exec "${PIP}" install {} \;
 
- # Building locally for development
- rm -fr _python_build && mkdir _python_build
- cd _python_build
- ln -s ../bazel-bin/tensorflow/tools/pip_package/build_pip_package.runfiles/* .
- ln -s ../tensorflow/tools/pip_package/* .
- "${PYTHON}" setup.py develop
+ # # Building locally for development
+ # rm -fr _python_build && mkdir _python_build
+ # cd _python_build
+ # ln -s ../bazel-bin/tensorflow/tools/pip_package/build_pip_package.runfiles/* .
+ # ln -s ../tensorflow/tools/pip_package/* .
+ # "${PYTHON}" setup.py develop
 )
