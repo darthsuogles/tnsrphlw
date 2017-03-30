@@ -15,7 +15,7 @@ export PYTHON="$(which python${PY_VER})"
 export PIP="$(which pip${PY_VER})"
 
 if [ "darwin" == "${OS}" ]; then
-    brew install bazel swig
+    brew upgrade bazel swig || brew install bazel swig
 else
     module load linuxbrew bazel python
     # if [[ "2" == "${PY_VER}" ]]; then
@@ -29,12 +29,12 @@ else
 fi
 
 "${PIP}" install -U six numpy wheel
+git submodule update --init --recursive
 (cd dev; echo "Update google/tensorflow repo"
 
- git remote add forigink https://github.com/tensorflow/tensorflow.git || echo "already there"
- git fetch --all
- git checkout forigink/master
- git submodule update --init --recursive 
+ # git fetch --all
+ # git checkout forigink/master
+ # git submodule update --init --recursive 
 
  export USE_DEFAULT_PYTHON_LIB_PATH=1
  export TF_NEED_GCP=0
