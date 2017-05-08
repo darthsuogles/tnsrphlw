@@ -11,11 +11,12 @@ from keras.preprocessing import image as keras_image
 # Load specific models
 from keras.applications.resnet50 import ResNet50
 from keras.applications.resnet50 import preprocess_input, decode_predictions
+# Load Xception
+from keras.applications.xception import Xception
 
 # External image datasets
 from pathlib import Path
 from PIL import Image
-from skimage import data, io, filters, transform
 
 nnet = Sequential()
 nnet.add(Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
@@ -49,6 +50,7 @@ def train_nnet(nnet, feats, labels):
     nnet.fit(X_train, y_train, epochs=5, batch_size=64)
     loss_and_metrics = nnet.evaluate(X_train, y, batch_size=64)
 
+
 nnet_res50 = ResNet50(weights='imagenet')
 
 root_fpath = Path.home() / 'local' / 'data' 
@@ -59,3 +61,5 @@ x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
 preds = nnet_res50.predict(x)
 print(decode_predictions(preds, top=5)[0])
+
+# https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html

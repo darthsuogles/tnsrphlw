@@ -42,7 +42,7 @@ git submodule update --init --recursive
  export TF_NEED_CUDA=0
  export TF_NEED_OPENCL=0
  export TF_NEED_JEMALLOC=1
- export TF_ENABLE_XLA=0
+ export TF_ENABLE_XLA=1
  export PYTHON_BIN_PATH="$(which python3)"
  export CC_OPT_FLAGS="-march=native"
  ./configure
