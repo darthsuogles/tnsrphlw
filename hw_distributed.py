@@ -95,7 +95,8 @@ _ops = graph.get_operations()
 
 def show_graph(graph_def, max_const_size=32):
     """Visualize TensorFlow graph."""
-    _tfb_url = "https://tensorboard.appspot.com/tf-graph-basic.build.html"
+    #_tfb_url = "https://tensorboard.appspot.com/tf-graph-basic.build.html"
+    _tfb_url = "http://localhost:8000/tensorboard/tf-graph-basic.build.html"
     if hasattr(graph_def, 'as_graph_def'):
         graph_def = graph_def.as_graph_def()
 
@@ -132,6 +133,7 @@ def show_graph(graph_def, max_const_size=32):
     with open(str(fp_out), 'w') as fout:
         fout.write(code)
     wb = webbrowser.get('chrome')
-    wb.open('file://{}'.format(fp_out))
+    wb.open('http://localhost:8000/{}'.format(fp_out.name))
 
 
+show_graph(graph_def)

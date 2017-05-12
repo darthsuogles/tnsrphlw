@@ -4,6 +4,7 @@ __py_ver=${1:-3}
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 NUKE_EXISTING=yes
+BRANCH=r1.1
 
 set -ex
 
@@ -29,13 +30,10 @@ else
 fi
 
 "${PIP}" install -U six numpy wheel
-git submodule update --init --recursive
+git submodule update --init --recursive --remote
 (cd dev; echo "Update google/tensorflow repo"
-
- # git fetch --all
- # git checkout forigink/master
- # git submodule update --init --recursive 
-
+ git reset --hard "origin/${BRANCH}"
+ 
  export USE_DEFAULT_PYTHON_LIB_PATH=1
  export TF_NEED_GCP=0
  export TF_NEED_HDFS=0
@@ -43,12 +41,11 @@ git submodule update --init --recursive
  export TF_NEED_OPENCL=0
  export TF_NEED_JEMALLOC=1
  export TF_ENABLE_XLA=1
+ export TF_NEED_MKL=0
+ export TF_NEED_VERBS=0
  export PYTHON_BIN_PATH="$(which python3)"
  export CC_OPT_FLAGS="-march=native"
  ./configure
-#  ./configure <<EOF
-# $(find "${PYTHON_PKG_PREFIX}" -type d -name 'site-packages' | head -n1)
-# EOF
 
  # Installing as a python package
  [ "yes" == "${NUKE_EXISTING}" ] && bazel clean --expunge
