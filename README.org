@@ -2,3 +2,5 @@
 
 Use the =build_tensorflow.sh= to build and install the package.
 Under =linux=, an =environment module= management package (e.g. =Lmod=) is required.
+
+The default versions are =cuDNN-7= and =CUDA-9=.
